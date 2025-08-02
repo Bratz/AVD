@@ -1,0 +1,724 @@
+# MCP Prompt Registry Configuration
+# Version: 2.0.0
+# Last Updated: 2024-01-20
+
+metadata:
+  version: "2.0.0"
+  description: "TCS BaNCS Core Banking MCP Prompt Registry"
+  total_prompts: 6
+  categories: ["discovery", "guidance", "troubleshooting", "workflows"]
+
+# Main prompt registry
+
+system_prompts:
+  banking_specialist:
+    name: "banking_specialist"
+    description: "System prompt for TCS BaNCS banking specialist agent"
+    variables:
+      role: "User role (admin, customer, guest)"
+      llm_type: "LLM type (cloud, ollama)"
+    template: |
+      You are a TCS BaNCS Core Banking AI Assistant specialized in banking operations.
+      
+      ## Your Role: {{ role|upper }}
+      ## System Mode: {{ llm_type }}
+      
+      {% if role == "admin" %}
+      As an ADMIN, you have full access to:
+      - All account management operations
+      - Customer data management
+      - Transaction reversals
+      - System configuration
+      - Audit and compliance functions
+      {% elif role == "customer" %}
+      As a CUSTOMER service representative, you can:
+      - Check account balances and transactions
+      - Process standard transfers (with limits)
+      - View customer information
+      - Handle routine banking requests
+      {% else %}
+      As a GUEST, you have limited access to:
+      - General banking information
+      - Product details
+      - Public FAQs
+      {% endif %}
+      
+      ## Core Banking Tools
+      
+      You have access to three powerful tools:
+      
+      1. **list_api_endpoints** - Discover available banking operations
+         - Use tags like "accountManagement", "customerManagement", "loan", "payment"
+         - Search for specific operations
+         
+      2. **get_api_endpoint_schema** - Get detailed parameter requirements
+         - Check required fields
+         - Understand data formats
+         
+      3. **invoke_api_endpoint** - Execute banking operations
+         - Provide all required parameters
+         - Handle responses appropriately
+      
+      ## Important Guidelines
+      
+      - Always validate user requests against their role permissions
+      - Use proper date format: YYYYMMDD
+      - Currency codes: ISO 4217 (USD, EUR, INR)
+      - Include required headers: entity, userId, languageCode
+      - Handle errors gracefully with clear explanations
+      
+      ## Workflow Example
+      
+      For any banking request:
+      1. First use `list_api_endpoints` to find the right operation
+      2. Then use `get_api_endpoint_schema` to understand requirements
+      3. Finally use `invoke_api_endpoint` to execute
+      
+      How can I assist with your banking needs today?
+
+prompts:
+  discover_banking_apis_by_domain:
+    name: "discover_banking_apis_by_domain"
+    description: "Discover TCS BaNCS banking operations organized by business domain"
+    category: "discovery"
+    version: "1.0.0"
+    deprecated: false
+    arguments: []
+    template: |
+      # TCS BaNCS Core Banking API Operations by Domain
+      
+      This API provides banking operations organized into the following domains:
+      
+      ## Account Management
+      - Account creation, balance inquiries, transaction history
+      - Account blocks and restrictions management
+      - Cash blocks and releases
+      
+      ## Loan Management
+      - Loan origination and details
+      - Repayment schedules and discharge inquiries
+      - Collateral management
+      
+      ## Customer Management
+      - Customer onboarding (KYC)
+      - Customer profile management
+      - Customer search and details
+      
+      ## Financial Accounting
+      - Booking creation for transactions
+      - General ledger operations
+      
+      ## Payments & Transfers
+      - Fund transfers between accounts
+      - Transaction status tracking
+      
+      ## Compliance
+      - AML (Anti-Money Laundering) checks
+      - Regulatory reporting
+      
+      Use `list_api_endpoints(tag="domain_name")` to explore specific domains.
+
+  explain_banking_endpoint:
+    name: "explain_banking_endpoint"
+    description: "Get detailed explanation of a specific banking API endpoint with field validations"
+    category: "guidance"
+    version: "1.0.0"
+    deprecated: false
+    arguments:
+      - name: "endpoint_name"
+        description: "Name of the banking endpoint to explain"
+        type: "string"
+        required: true
+    template: |
+      # {{ endpoint_name }}
+      
+      ## Required Headers (Common to all endpoints)
+      - `entity`: Entity code (e.g., GPRDTTSTOU)
+      - `userId`: User ID for authentication
+      - `languageCode`: Language preference (e.g., 1 for English)
+      
+      ## Endpoint-Specific Headers
+      Depending on the operation, additional headers may be required:
+      - `accountReference`: For account-specific operations
+      - `loanReference`: For loan-specific operations
+      - `customerReference`: For customer-specific operations
+      
+      ## Field Validations
+      Common validation rules across TCS BaNCS:
+      - Dates: YYYYMMDD format (e.g., 20250509)
+      - Currency: ISO 4217 codes (USD, EUR, INR)
+      - Account IDs: Alphanumeric, typically 15 digits
+      - Customer IDs: Numeric, typically 6 digits
+      - Amounts: Positive decimals with 2 decimal places
+      
+      Use `get_api_endpoint_schema("{{ endpoint_name }}")` for complete field details.
+
+  banking_api_quick_start:
+    name: "banking_api_quick_start"
+    description: "Quick start guide for using TCS BaNCS Core Banking APIs"
+    category: "guidance"
+    version: "1.1.0"
+    deprecated: false
+    arguments: []
+    template: |
+      # TCS BaNCS Core Banking API Quick Start Guide
+      
+      ## Environment Setup
+      1. Base URL: `https://demoapps.tcsbancs.com/Core`
+      2. Register at: https://marketplace.tcsbancs.com
+      3. Set environment variables:
+         ```bash
+         export API_BASE_URL="https://demoapps.tcsbancs.com/Core"
+         export BANCS_ENTITY="GPRDTTSTOU"  # Your entity code
+         export BANCS_USER_ID="1"          # Your user ID
+         export BANCS_LANGUAGE="1"         # Language code
+         ```
+      
+      ## Common Headers (Required for ALL requests)
+      ```json
+      {
+        "entity": "${BANCS_ENTITY}",
+        "userId": "${BANCS_USER_ID}",
+        "languageCode": "${BANCS_LANGUAGE}"
+      }
+      ```
+      
+      ## Discovery Commands
+      - List all operations: `await list_api_endpoints()`
+      - Search banking operations: `await list_api_endpoints(tag="account")`
+      - Get operation details: `await get_api_endpoint_schema("get_account_balance")`
+      
+      ## Common Banking Workflows
+      1. **Check Account Balance**:
+         ```python
+         await get_account_balance(accountreference="101000000101814")
+         ```
+      
+      2. **Create Customer**:
+         ```python
+         await customer_create({
+           "businessPartner": {...},
+           "individual": {...},
+           "identification": [...]
+         })
+         ```
+      
+      3. **Transfer Funds**:
+         ```python
+         await initiate_payment({
+           "sourceAccount": "101000000101814",
+           "destinationAccount": "101000000104016",
+           "amount": 50.00,
+           "currency": "USD"
+         })
+         ```
+
+  banking_error_handling:
+    name: "banking_error_handling"
+    description: "Guide for handling TCS BaNCS API errors"
+    category: "troubleshooting"
+    version: "1.0.0"
+    deprecated: false
+    arguments: []
+    template: |
+      # TCS BaNCS API Error Handling Guide
+      
+      ## Common Banking Error Patterns
+      
+      1. **Authentication Errors (401)**
+         - Missing required headers (entity, userId, languageCode)
+         - Invalid entity code or user credentials
+         - Solution: Verify all common headers are present
+      
+      2. **Business Validation Errors (400)**
+         - Invalid account/customer/loan reference
+         - Insufficient funds
+         - Account restrictions/blocks
+         - Date format errors (use YYYYMMDD)
+         - Invalid currency codes
+      
+      3. **Not Found Errors (404)**
+         - Account/Customer/Loan not found
+         - Check reference numbers are correct
+         - Verify entity context
+      
+      4. **Forbidden Errors (403)**
+         - Insufficient privileges
+         - Account blocked for operation
+         - Compliance restrictions (AML flags)
+      
+      ## Field Validation Rules
+      - **Dates**: Always use YYYYMMDD format
+      - **Amounts**: Positive decimals, 2 decimal places
+      - **Currency**: ISO 4217 codes (USD, EUR, INR)
+      - **Account References**: 15-digit alphanumeric
+      - **Customer IDs**: 6-digit numeric
+      
+      ## Error Response Format
+      ```json
+      {
+        "error": true,
+        "errorCode": "ACC001",
+        "message": "Account not found",
+        "details": {
+          "accountReference": "101000000101814",
+          "entity": "GPRDTTSTOU"
+        }
+      }
+      ```
+
+  find_banking_operations_by_entity:
+    name: "find_banking_operations_by_entity"
+    description: "Find operations related to a specific banking entity (account, customer, loan)"
+    category: "discovery"
+    version: "1.0.0"
+    deprecated: false
+    arguments:
+      - name: "entity_type"
+        description: "Type of banking entity (account, customer, loan, payment)"
+        type: "string"
+        required: true
+        enum: ["account", "customer", "loan", "payment"]
+      - name: "entity_id"
+        description: "Optional specific entity ID to search for"
+        type: "string"
+        required: false
+    template: |
+      # Banking Operations for {{ entity_type }}
+      
+      {% if entity_id %}
+      Searching for operations related to {{ entity_type }}: {{ entity_id }}
+      {% else %}
+      Searching for all {{ entity_type }} operations...
+      {% endif %}
+      
+      ## Available Operations:
+      {% if entity_type == "account" %}
+      ### Account Operations
+      - **Balance & Info**: `get_account_balance`, `get_account_details`
+      - **Transactions**: `get_account_transactions`, `get_transaction_details`
+      - **Management**: `block_account`, `unblock_account`, `update_account_info`
+      - **Cash Blocks**: `create_cash_block`, `release_cash_block`, `list_cash_blocks`
+      
+      Use: `await list_api_endpoints(tag="account")`
+      
+      {% elif entity_type == "customer" %}
+      ### Customer Operations
+      - **Creation**: `customer_create`, `customer_onboard_kyc`
+      - **Search**: `customer_search`, `get_customer_list`
+      - **Details**: `get_customer_details`, `get_customer_accounts`
+      - **Updates**: `update_customer_info`, `update_customer_kyc`
+      
+      Use: `await list_api_endpoints(tag="customer")`
+      
+      {% elif entity_type == "loan" %}
+      ### Loan Operations
+      - **Creation**: `create_loan`, `create_loan_application`
+      - **Details**: `get_loan_details`, `get_loan_balance`
+      - **Repayment**: `get_repayment_schedule`, `make_loan_payment`
+      - **Management**: `restructure_loan`, `loan_prepayment`
+      
+      Use: `await list_api_endpoints(tag="loan")`
+      
+      {% elif entity_type == "payment" %}
+      ### Payment Operations
+      - **Transfer**: `initiate_payment`, `internal_transfer`, `external_transfer`
+      - **Status**: `get_payment_status`, `track_payment`
+      - **History**: `get_payment_history`, `get_transfer_limits`
+      
+      Use: `await list_api_endpoints(tag="payment")`
+      {% endif %}
+
+  generate_banking_request:
+    name: "generate_banking_request"
+    description: "Generate example request for a banking endpoint"
+    category: "guidance"
+    version: "1.2.0"
+    deprecated: false
+    arguments:
+      - name: "endpoint_name"
+        description: "Name of the banking endpoint"
+        type: "string"
+        required: true
+      - name: "scenario"
+        description: "Business scenario"
+        type: "string"
+        required: true
+        enum: [
+          "new_savings_account",
+          "new_current_account",
+          "check_balance",
+          "transfer_funds",
+          "loan_application",
+          "customer_onboarding",
+          "block_account",
+          "get_transactions"
+        ]
+    template: |
+      # Example Request for {{ endpoint_name }}
+      ## Scenario: {{ scenario }}
+      
+      ### Common Headers (Always Required)
+      ```python
+      headers = {
+          "entity": os.getenv("BANCS_ENTITY", "GPRDTTSTOU"),
+          "userId": os.getenv("BANCS_USER_ID", "1"),
+          "languageCode": os.getenv("BANCS_LANGUAGE", "1"),
+          "Content-Type": "application/json"
+      }
+      ```
+      
+      {% if scenario == "new_savings_account" %}
+      ### Create Savings Account
+      ```python
+      # Endpoint: POST /account/create
+      account_data = {
+          "account": {
+              "customerId": 146039,
+              "accountType": 1,  # 1=Savings, 2=Current
+              "accountCurrency": "USD",
+              "accountName": "Personal Savings Account",
+              "branchId": "101",
+              "product": 1037,  # Savings product code
+              "initialDeposit": 500.00,
+              "accountUsage": "PERSONAL",
+              "statementFrequency": "MONTHLY"
+          }
+      }
+      
+      result = await invoke_api_endpoint(
+          "account_create",
+          method="POST",
+          body=account_data,
+          headers=headers
+      )
+      print(f"New account created: {result['accountReference']}")
+      ```
+      
+      {% elif scenario == "new_current_account" %}
+      ### Create Current Account
+      ```python
+      # Endpoint: POST /account/create
+      account_data = {
+          "account": {
+              "customerId": 146039,
+              "accountType": 2,  # 2=Current/Checking
+              "accountCurrency": "USD",
+              "accountName": "Business Current Account",
+              "branchId": "101",
+              "product": 2045,  # Current product code
+              "overdraftLimit": 5000.00,
+              "accountUsage": "BUSINESS"
+          }
+      }
+      
+      result = await invoke_api_endpoint(
+          "account_create",
+          method="POST",
+          body=account_data,
+          headers=headers
+      )
+      ```
+      
+      {% elif scenario == "check_balance" %}
+      ### Check Account Balance
+      ```python
+      # Endpoint: GET /account/balance/{accountReference}
+      account_ref = "101000000101814"
+      
+      balance = await invoke_api_endpoint(
+          "get_account_balance",
+          method="GET",
+          path_params={"accountReference": account_ref},
+          headers=headers
+      )
+      
+      print(f"Account: {account_ref}")
+      print(f"Available Balance: {balance['currency']} {balance['availableBalance']}")
+      print(f"Current Balance: {balance['currency']} {balance['currentBalance']}")
+      print(f"Hold Amount: {balance['currency']} {balance['holdAmount']}")
+      ```
+      
+      {% elif scenario == "transfer_funds" %}
+      ### Internal Fund Transfer
+      ```python
+      # Endpoint: POST /payment/transfer
+      transfer_data = {
+          "payment": {
+              "sourceAccount": "101000000101814",
+              "destinationAccount": "101000000104016",
+              "amount": 100.00,
+              "currency": "USD",
+              "transactionDate": datetime.now().strftime("%Y%m%d"),
+              "valueDate": datetime.now().strftime("%Y%m%d"),
+              "description": "Internal transfer - Invoice payment",
+              "paymentType": "INTERNAL",
+              "paymentMode": "IMMEDIATE",
+              "reference": f"TRF{datetime.now().strftime('%Y%m%d%H%M%S')}"
+          }
+      }
+      
+      result = await invoke_api_endpoint(
+          "initiate_payment",
+          method="POST",
+          body=transfer_data,
+          headers=headers
+      )
+      print(f"Transfer successful: {result['transactionId']}")
+      print(f"Status: {result['status']}")
+      ```
+      
+      {% elif scenario == "loan_application" %}
+      ### Create Loan Application
+      ```python
+      # Endpoint: POST /loan/application
+      loan_data = {
+          "loanApplication": {
+              "customerId": 146039,
+              "loanType": "PERSONAL",
+              "loanAmount": 50000.00,
+              "currency": "USD",
+              "tenure": 36,  # months
+              "purpose": "Home Renovation",
+              "interestRate": 8.5,
+              "repaymentFrequency": "MONTHLY",
+              "collateral": []
+          }
+      }
+      
+      result = await invoke_api_endpoint(
+          "create_loan_application",
+          method="POST",
+          body=loan_data,
+          headers=headers
+      )
+      ```
+      
+      {% elif scenario == "customer_onboarding" %}
+      ### Customer Onboarding
+      ```python
+      # Endpoint: POST /customer/create
+      customer_data = {
+          "businessPartner": {
+              "bpType": "INDIVIDUAL",
+              "nationality": "US",
+              "residenceCountry": "US"
+          },
+          "individual": {
+              "firstName": "John",
+              "lastName": "Doe",
+              "dateOfBirth": "19850315",
+              "gender": "M",
+              "maritalStatus": "SINGLE",
+              "occupation": "SOFTWARE_ENGINEER",
+              "annualIncome": 85000.00
+          },
+          "identification": [
+              {
+                  "idType": "SSN",
+                  "idNumber": "123-45-6789",
+                  "issueCountry": "US",
+                  "issueDate": "20200101",
+                  "expiryDate": "20301231"
+              }
+          ],
+          "address": [
+              {
+                  "addressType": "HOME",
+                  "line1": "123 Main Street",
+                  "city": "New York",
+                  "state": "NY",
+                  "country": "US",
+                  "postalCode": "10001"
+              }
+          ],
+          "contact": {
+              "mobileNumber": "+1-555-123-4567",
+              "email": "john.doe@email.com"
+          }
+      }
+      
+      result = await invoke_api_endpoint(
+          "customer_create",
+          method="POST",
+          body=customer_data,
+          headers=headers
+      )
+      print(f"Customer created: {result['customerId']}")
+      ```
+      
+      {% elif scenario == "block_account" %}
+      ### Block Account
+      ```python
+      # Endpoint: POST /account/block
+      block_data = {
+          "accountBlock": {
+              "accountReference": "101000000101814",
+              "blockType": "DEBIT",  # DEBIT, CREDIT, or TOTAL
+              "blockReason": "SUSPICIOUS_ACTIVITY",
+              "effectiveDate": datetime.now().strftime("%Y%m%d"),
+              "remarks": "Temporary block pending investigation"
+          }
+      }
+      
+      result = await invoke_api_endpoint(
+          "block_account",
+          method="POST",
+          body=block_data,
+          headers=headers
+      )
+      print(f"Block reference: {result['blockReference']}")
+      ```
+      
+      {% elif scenario == "get_transactions" %}
+      ### Get Account Transactions
+      ```python
+      # Endpoint: GET /account/transactions
+      params = {
+          "accountReference": "101000000101814",
+          "fromDate": "20240101",
+          "toDate": "20241231",
+          "transactionType": "ALL",  # ALL, CREDIT, DEBIT
+          "pageSize": 50,
+          "pageNumber": 1
+      }
+      
+      transactions = await invoke_api_endpoint(
+          "get_account_transactions",
+          method="GET",
+          query_params=params,
+          headers=headers
+      )
+      
+      for txn in transactions['transactions']:
+          print(f"{txn['date']} | {txn['description']} | {txn['amount']} {txn['type']}")
+      ```
+      {% endif %}
+      
+      ### Error Handling
+      ```python
+      try:
+          result = await invoke_api_endpoint(...)
+      except MCPError as e:
+          print(f"Error: {e.error_code} - {e.message}")
+          if e.details:
+              print(f"Details: {e.details}")
+      ```
+
+# System prompts for agent roles
+system_prompts:
+  banking_specialist:
+    name: "banking_specialist"
+    description: "System prompt for TCS BaNCS banking specialist agent"
+    category: "system"
+    version: "2.0.0"
+    arguments:
+      - name: "role"
+        description: "User role (admin, customer, guest)"
+        type: "string"
+        required: true
+        enum: ["admin", "customer", "guest"]
+      - name: "llm_type"
+        description: "LLM type (cloud, ollama)"
+        type: "string"
+        required: false
+        default: "cloud"
+    template: |
+      You are a TCS BaNCS Core Banking specialist AI assistant with expertise in banking operations and API integration.
+      
+      ## Your Role: {{ role | upper }}
+      
+      {% if role == "admin" %}
+      ### Administrative Access
+      You have full administrative privileges including:
+      - Account creation and management
+      - Customer onboarding and KYC updates
+      - Transaction reversals and corrections
+      - System configuration and limits management
+      - Audit and compliance operations
+      - Access to all banking modules
+      
+      ### Guidelines:
+      - Always verify authorization before sensitive operations
+      - Log all administrative actions
+      - Follow dual-control procedures where required
+      
+      {% elif role == "customer" %}
+      ### Customer Service Access
+      You can assist with standard banking operations:
+      - Balance and transaction inquiries
+      - Fund transfers (within approved limits)
+      - Account statement generation
+      - Basic account updates
+      - Product information and applications
+      
+      ### Restrictions:
+      - Cannot perform administrative functions
+      - Transfer limits apply
+      - Cannot access other customers' data
+      - Cannot reverse transactions
+      
+      {% else %}
+      ### Guest/Public Access
+      You have limited access for:
+      - General product information
+      - Banking hours and locations
+      - Interest rates and fees
+      - Application procedures
+      - Public FAQs
+      
+      ### Restrictions:
+      - No access to account data
+      - No transaction capabilities
+      - Information only mode
+      {% endif %}
+      
+      ## Core Capabilities
+      
+      1. **API Discovery**: Use `list_api_endpoints()` to find available operations
+      2. **Schema Inspection**: Use `get_api_endpoint_schema()` for parameter details
+      3. **API Execution**: Use `invoke_api_endpoint()` to perform operations
+      
+      ## Important Guidelines
+      
+      - Always validate input parameters before API calls
+      - Use proper date format: YYYYMMDD
+      - Include all required headers (entity, userId, languageCode)
+      - Handle errors gracefully with helpful messages
+      - {% if llm_type == "ollama" %}Keep responses concise and focused{% else %}Provide detailed explanations when needed{% endif %}
+      
+      ## Error Handling
+      
+      When errors occur:
+      1. Identify the error type (authentication, validation, business logic)
+      2. Provide clear explanation of what went wrong
+      3. Suggest corrective actions
+      4. Offer alternative approaches if available
+      
+      Remember: You're here to make banking operations smooth and efficient while maintaining security and compliance.
+
+# Index for quick lookup
+index:
+  by_category:
+    discovery:
+      - discover_banking_apis_by_domain
+      - find_banking_operations_by_entity
+    guidance:
+      - banking_api_quick_start
+      - explain_banking_endpoint
+      - generate_banking_request
+    troubleshooting:
+      - banking_error_handling
+    system:
+      - banking_specialist
+  
+  by_arguments:
+    no_args:
+      - discover_banking_apis_by_domain
+      - banking_api_quick_start
+      - banking_error_handling
+    with_args:
+      - explain_banking_endpoint
+      - find_banking_operations_by_entity
+      - generate_banking_request
+      - banking_specialist

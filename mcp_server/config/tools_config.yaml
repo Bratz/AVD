@@ -1,0 +1,41 @@
+tools:
+  - name: customer_profile
+    description: Retrieve customer profile from TCS BaNCS
+    input_schema:
+      type: object
+      properties:
+        customer_id:
+          type: string
+      required: [customer_id]
+  - name: account_balance
+    description: Get account balance from TCS BaNCS
+    input_schema:
+      type: object
+      properties:
+        customer_id:
+          type: string
+      required: [customer_id]
+  - name: transaction
+    description: Get transaction history from TCS BaNCS
+    input_schema:
+      type: object
+      properties:
+        customer_id:
+          type: string
+      required: [customer_id]
+  - name: market_analysis
+    description: Search banking trends via Tavily
+    input_schema:
+      type: object
+      properties:
+        query:
+          type: string
+      required: [query]
+  - name: financial_advice
+    description: Generate financial advice using LLM
+    input_schema:
+      type: object
+      properties:
+        prompt:
+          type: string
+      required: [prompt]

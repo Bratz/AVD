@@ -1,0 +1,102 @@
+tools:
+- description: Get Account Block List
+  input_schema:
+    properties:
+      accountReference: null
+      pageNum: null
+      pageSize: null
+    required:
+    - accountReference
+    type: object
+  name: get_account_block_list
+  tags:
+  - Account Management
+- description: Get Account Balance
+  input_schema:
+    properties:
+      accountReference: null
+    required:
+    - accountReference
+    type: object
+  name: get_account_balance
+  tags:
+  - Account Management
+- description: Get Loan Details
+  input_schema:
+    properties:
+      loanReference: null
+    required:
+    - loanReference
+    - loanReference
+    type: object
+  name: get_loan_details
+  tags:
+  - Loan Management
+- description: Create Customer
+  input_schema:
+    properties: {}
+    required: []
+    type: object
+  name: create_customer
+  tags:
+  - Customer Management
+- description: Get Customer Details
+  input_schema:
+    properties:
+      customerId: null
+    required:
+    - customerId
+    type: object
+  name: get_customer_details
+  tags:
+  - Customer Management
+- description: Create Booking
+  input_schema:
+    properties: {}
+    required: []
+    type: object
+  name: create_booking
+  tags:
+  - Financial Accounting
+- description: Initiate Payment
+  input_schema:
+    properties: {}
+    required: []
+    type: object
+  name: initiate_payment
+  tags:
+  - Payments
+- description: Get Transaction Status
+  input_schema:
+    properties:
+      transactionId: null
+    required:
+    - transactionId
+    type: object
+  name: get_transaction_status
+  tags:
+  - Payments
+- description: Perform AML Check
+  input_schema:
+    properties: {}
+    required: []
+    type: object
+  name: perform_amlcheck
+  tags:
+  - Compliance
+- description: Create Account
+  input_schema:
+    properties: {}
+    required: []
+    type: object
+  name: create_account
+  tags:
+  - Account Management
+- description: Post Transaction
+  input_schema:
+    properties: {}
+    required: []
+    type: object
+  name: post_transaction
+  tags:
+  - Transactions
