@@ -1,0 +1,42 @@
+{
+    "input": {
+        "score_threshold": 0.85,
+        "rules": [
+            {
+                "id": "RBI-IN-001",
+                "description": "No PII in input (e.g., Aadhaar, PAN, SSN)",
+                "pattern": "\\d{12}|\\d{3}-\\d{2}-\\d{4}|\\d{10}",
+                "source": "RBI Storage of Payment System Data, 2018"
+            },
+            {
+                "id": "RBI-IN-002",
+                "description": "No sensitive payment credentials",
+                "pattern": ".*(otp|pin|password).*",
+                "source": "RBI Storage of Payment System Data, 2018"
+            }
+        ]
+    },
+    "output": {
+        "score_threshold": 0.9,
+        "rules": [
+            {
+                "id": "RBI-OUT-001",
+                "description": "No non-compliant language",
+                "pattern": ".*(non-compliant|violation|breach).*",
+                "source": "RBI Payments Regulatory Board, 2025"
+            },
+            {
+                "id": "RBI-OUT-002",
+                "description": "No discriminatory language",
+                "pattern": ".*(bias|discriminate|unfair).*",
+                "source": "RBI General Guidelines"
+            },
+            {
+                "id": "RBI-OUT-003",
+                "description": "Ensure alignment with AIF investment rules",
+                "pattern": ".*(alternative investment fund|aif).*",
+                "source": "RBI Draft Directions, 2025"
+            }
+        ]
+    }
+}

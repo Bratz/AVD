@@ -1,0 +1,12 @@
+bypass
+evade
+exempt
+social security number
+credit card
+bank account
+confidential
+aadhaar number
+pan number
+otp
+pin
+password
