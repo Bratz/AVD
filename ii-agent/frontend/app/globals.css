@@ -1,0 +1,592 @@
+/* ===================================
+   Tailwind v4 Base Configuration
+   =================================== */
+@import "tailwindcss";
+
+/* Design System Imports */
+@import "./styles/design-tokens.css";
+@import "./styles/animations.css";
+@import "./styles/utilities.css";
+
+/* Dark mode variant */
+@custom-variant dark (&:is(.dark *));
+
+/* Tailwind Plugins */
+@plugin "tailwindcss-animate";
+
+/* ===================================
+   Theme Configuration
+   =================================== */
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Map CSS variables to Tailwind theme colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  
+  /* Radius tokens */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+/* ===================================
+   CSS Variables (Light Theme)
+   =================================== */
+:root {
+  /* Sidebar */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Core colors */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  
+  /* Chart colors */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  
+  /* Layout */
+  --radius: 0.625rem;
+}
+
+/* ===================================
+   CSS Variables (Dark Theme)
+   =================================== */
+.dark {
+  /* Sidebar */
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  
+  /* Core colors */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  
+  /* Chart colors */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+}
+
+/* ===================================
+   Base Layer Styles
+   =================================== */
+@layer base {
+  /* Reset and defaults */
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold;
+  }
+
+  h1 { @apply text-4xl; }
+  h2 { @apply text-3xl; }
+  h3 { @apply text-2xl; }
+  h4 { @apply text-xl; }
+  h5 { @apply text-lg; }
+  h6 { @apply text-base; }
+
+  /* Links */
+  a {
+    @apply transition-colors hover:text-primary;
+  }
+
+  /* Code */
+  code {
+    @apply font-mono text-sm;
+  }
+
+  pre {
+    @apply font-mono text-sm overflow-x-auto;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+}
+
+/* ===================================
+   Z-index System
+   =================================== */
+.z-base { z-index: 1; }
+.z-dropdown { z-index: 10; }
+.z-sticky { z-index: 20; }
+.z-modal { z-index: 30; }
+.z-notification { z-index: 40; }
+.z-tooltip { z-index: 50; }
+.z-sidebar-button { z-index: 60; }
+
+/* Legacy z-index (for compatibility) */
+.z-content { z-index: 10; }
+.z-header { z-index: 40; }
+.z-sidebar-panel { z-index: 45; }
+.main-header { z-index: 50; }
+.sidebar-toggle { z-index: 60; }
+.ui-mode-toggle { z-index: 40; }
+
+[data-sidebar-button] {
+  z-index: 50 !important;
+}
+
+/* ===================================
+   Scrollbar Styles
+   =================================== */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 130, 246, 0.5);
+}
+
+/* ===================================
+   Markdown Styles
+   =================================== */
+.markdown-body {
+  @apply text-foreground;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  transition: all 0.1s ease-out;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Typography in markdown */
+.markdown-body h1 {
+  @apply text-2xl font-bold mt-6 mb-4;
+}
+
+.markdown-body h2 {
+  @apply text-xl font-bold mt-5 mb-3;
+}
+
+.markdown-body h3 {
+  @apply text-lg font-bold mt-4 mb-2;
+}
+
+.markdown-body p {
+  @apply my-2 leading-relaxed;
+}
+
+.markdown-body p:first-child {
+  margin-top: 0;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Lists */
+.markdown-body ul {
+  @apply my-3 space-y-1;
+  list-style: none;
+  padding-left: 0;
+}
+
+.markdown-body ul li {
+  @apply relative;
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.markdown-body ul li::before {
+  content: "•";
+  @apply absolute left-2 text-muted-foreground;
+}
+
+.markdown-body ol {
+  @apply list-decimal list-inside my-4 space-y-2 pl-6;
+}
+
+/* Code blocks */
+.markdown-body pre {
+  @apply bg-muted rounded-lg p-4 overflow-x-auto my-4;
+  white-space: pre;
+}
+
+.markdown-body pre code {
+  @apply text-sm;
+  background: transparent !important;
+  white-space: pre;
+}
+
+.markdown-body :not(pre) > code {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Links */
+.markdown-body a {
+  @apply text-primary hover:text-primary/80 underline transition-colors;
+}
+
+/* Tables */
+.markdown-body table {
+  @apply w-full my-4;
+}
+
+.markdown-body th,
+.markdown-body td {
+  @apply border border-border px-4 py-2 text-left;
+}
+
+.markdown-body th {
+  @apply bg-muted font-semibold text-sm;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+  @apply border-l-4 border-muted-foreground/30 pl-4 italic my-4 text-muted-foreground;
+}
+
+/* Compact markdown variant */
+.markdown-compact .prose {
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.markdown-compact .prose p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* ===================================
+   Component Specific Styles
+   =================================== */
+
+/* Thinking box glass effect */
+.thinking-glass {
+  background: rgba(30, 31, 35, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* Stream cursor animation */
+@keyframes stream-pulse {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.5; transform: scaleY(0.8); }
+}
+
+.stream-cursor {
+  animation: stream-pulse 0.8s ease-in-out infinite;
+}
+
+/* Image fixes */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+img[alt*="Logo"] {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.next-image-auto-height {
+  height: auto !important;
+}
+
+.next-image-auto-width {
+  width: auto !important;
+}
+
+/* Chart.js theme-aware styles */
+.chart-container canvas {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* ===================================
+   React Flow Customizations
+   =================================== */
+.agent-node {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.agent-node:hover {
+  transform: translateY(-2px);
+}
+
+.react-flow__node {
+  cursor: pointer;
+}
+
+.react-flow__handle {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* N8n-style React Flow */
+.react-flow-n8n-style {
+  background-color: #0f0f0f;
+}
+
+.react-flow-n8n-style .react-flow__edge-path {
+  stroke: #4b5563;
+  stroke-width: 2px;
+}
+
+.react-flow-n8n-style .react-flow__edge.selected .react-flow__edge-path {
+  stroke: #0b57d0;
+  stroke-width: 3px;
+}
+
+/* React Flow controls */
+.react-flow-controls-n8n {
+  background: #1e1e1e;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.react-flow-controls-n8n button {
+  background: #1e1e1e;
+  border: none;
+  color: #9aa0a6;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.react-flow-controls-n8n button:hover {
+  background: #2e2e2e;
+  color: white;
+}
+
+/* ===================================
+   ROWBOAT Specific Styles
+   =================================== */
+.rowboat-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rowboat-header {
+  position: relative;
+  z-index: 20;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.rowboat-content {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: var(--background);
+}
+
+.workflow-builder-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.workflow-builder-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.workflow-textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: inherit;
+}
+
+.workflow-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Dark mode ROWBOAT fixes */
+.dark .rowboat-container {
+  background: #0a0a0a;
+}
+
+.dark .workflow-builder-card {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+@media (max-width: 768px) {
+  button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .workflow-builder-wrapper {
+    padding: 1rem;
+  }
+  
+  .workflow-builder-card {
+    padding: 1.5rem;
+  }
+}
+
+/* ===================================
+   Utility Classes
+   =================================== */
+.no-transition * {
+  transition: none !important;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
