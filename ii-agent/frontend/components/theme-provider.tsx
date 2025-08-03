@@ -1,0 +1,23 @@
+// components/theme-provider.tsx
+"use client";
+
+import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={true}
+      disableTransitionOnChange={false}
+      storageKey="chatgbp-theme"
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
+}

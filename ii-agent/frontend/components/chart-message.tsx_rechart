@@ -1,0 +1,524 @@
+// components/chart-message.tsx
+import React from 'react';
+import {
+  BarChart, Bar, LineChart, Line, PieChart, Pie, AreaChart, Area,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+} from 'recharts';
+
+interface ChartStyle {
+  colors: string[];
+  gradients?: Record<string, Array<{offset: string; color: string}>>;
+  grid: {
+    show: boolean;
+    stroke: string;
+    strokeDasharray: string;
+  };
+  axis: {
+    fontSize: number;
+    color: string;
+    fontFamily: string;
+  };
+  tooltip: {
+    backgroundColor: string;
+    borderRadius: string;
+    padding: string;
+    boxShadow: string;
+  };
+  bar: {
+    radius: number[];
+    maxBarSize: number;
+  };
+  line: {
+    strokeWidth: number;
+    dot: boolean | object;
+    activeDot: object;
+  };
+  pie: {
+    innerRadius: number;
+    outerRadius: number;
+    paddingAngle: number;
+    cornerRadius: number;
+  };
+}
+
+interface ChartData {
+  type: 'bar' | 'line' | 'pie' | 'area' | 'radar';
+  data: any[];
+  options?: {
+    title?: {
+      text: string;
+      fontSize?: number;
+      fontWeight?: number;
+      color?: string;
+      marginBottom?: number;
+    } | string;
+    subtitle?: {
+      text: string;
+      fontSize?: number;
+      color?: string;
+      marginBottom?: number;
+    };
+    legend?: {
+      show: boolean;
+    };
+    series?: string[];
+    colors?: string[];
+  };
+  style?: Partial<ChartStyle>;
+}
+
+// Default style configuration
+function getDefaultStyle(): ChartStyle {
+  return {
+    colors: [
+      '#2563eb', // Professional blue
+      '#7c3aed', // Purple
+      '#dc2626', // Red
+      '#059669', // Emerald green
+      '#ea580c', // Orange
+      '#0891b2', // Cyan
+      '#e11d48', // Rose
+      '#0f766e'  // Teal
+    ],
+    grid: {
+      show: true,
+      stroke: 'currentColor', // Lighter gray for better contrast
+      strokeDasharray: '3 3'
+    },
+    axis: {
+      fontSize: 12,
+      color: 'currentColor', // Medium gray for readability
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    },
+    tooltip: {
+      backgroundColor: 'var(--background)', // Dark gray
+      borderRadius: '6px',
+      padding: '8px 12px',
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+    },
+    bar: {
+      radius: [4, 4, 0, 0],
+      maxBarSize: 50
+    },
+    line: {
+      strokeWidth: 2,
+      dot: { r: 4 },
+      activeDot: { r: 6 }
+    },
+    pie: {
+      innerRadius: 0,
+      outerRadius: 100,
+      paddingAngle: 2,
+      cornerRadius: 4
+    }
+  };
+}
+
+export function detectChartData(content: string): { hasChart: boolean; chartData?: ChartData } {
+  
+  try {
+    // Look for chart data in markdown code blocks
+    const chartMatch = content.match(/```(?:chart|piechart)\n([\s\S]*?)\n```/);
+    
+    if (chartMatch) {
+      try {
+        const parsedData = JSON.parse(chartMatch[1]);
+        
+        // Check if it's a tool_call format
+        if (parsedData.tool_call && parsedData.tool_call.name === 'generate_chart') {
+          const args = parsedData.tool_call.arguments;
+          return {
+            hasChart: true,
+            chartData: {
+              type: args.chart_type || 'bar',
+              data: args.data,
+              options: {
+                title: args.title,
+                subtitle: args.subtitle,
+                legend: {
+                  show: args.show_legend !== false
+                }
+              },
+              style: {
+                colors: args.colors || getDefaultStyle().colors,
+                gradients: args.gradients,
+                grid: {
+                  show: args.show_grid !== false,
+                  stroke: args.grid_color || getDefaultStyle().grid.stroke,
+                  strokeDasharray: args.grid_stroke_dasharray || getDefaultStyle().grid.strokeDasharray
+                },
+                axis: {
+                  fontSize: args.axis_font_size || getDefaultStyle().axis.fontSize,
+                  color: args.axis_color || getDefaultStyle().axis.color,
+                  fontFamily: args.axis_font_family || getDefaultStyle().axis.fontFamily
+                },
+                tooltip: {
+                  backgroundColor: args.tooltip_background_color || getDefaultStyle().tooltip.backgroundColor,
+                  borderRadius: args.tooltip_border_radius || getDefaultStyle().tooltip.borderRadius,
+                  padding: args.tooltip_padding || getDefaultStyle().tooltip.padding,
+                  boxShadow: args.tooltip_box_shadow || getDefaultStyle().tooltip.boxShadow
+                },
+                bar: {
+                  radius: args.bar_radius || getDefaultStyle().bar.radius,
+                  maxBarSize: args.max_bar_size || getDefaultStyle().bar.maxBarSize
+                },
+                line: {
+                  strokeWidth: args.line_stroke_width || getDefaultStyle().line.strokeWidth,
+                  dot: args.line_dot !== undefined ? args.line_dot : getDefaultStyle().line.dot,
+                  activeDot: args.line_active_dot || getDefaultStyle().line.activeDot
+                },
+                pie: {
+                  innerRadius: args.pie_inner_radius || 0,
+                  outerRadius: args.pie_outer_radius || 100,
+                  paddingAngle: args.pie_padding_angle || 2,
+                  cornerRadius: args.pie_corner_radius || 4
+                }
+              }
+              // style: {
+                // colors: args.use_gradient ? ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] : undefined
+              // }
+            }
+          };
+        }
+        
+        // Check if it's a piechart format
+        if (parsedData.chartData && parsedData.chartData.labels && parsedData.chartData.datasets) {
+          // Convert piechart format to standard format
+          const pieData = parsedData.chartData.labels.map((label: string, index: number) => ({
+            name: label,
+            value: parsedData.chartData.datasets[0].data[index]
+          }));
+          
+          return {
+            hasChart: true,
+            chartData: {
+              type: 'pie',
+              data: pieData,
+              options: {
+                legend: { show: true }
+              },
+              style: {
+                colors: parsedData.chartData.datasets[0].backgroundColor
+              }
+            }
+          };
+        }
+        
+        // Original chart format
+        if (parsedData.type && parsedData.data) {
+          return { hasChart: true, chartData: parsedData };
+        }
+      } catch (e) {
+        console.error('Invalid chart JSON:', e);
+      }
+    }
+    
+    return { hasChart: false };
+  } catch (error) {
+    console.error('Error detecting chart data:', error);
+    return { hasChart: false };
+  }
+}
+
+export const ChartMessage: React.FC<{ chartData: ChartData }> = ({ chartData }) => {
+    console.log('[ChartMessage] Rendering with data:', chartData);
+  
+  
+    const { type, data, options = {}, style } = chartData;
+  
+  // Merge provided style with defaults - proper deep merge
+  const defaultStyle = getDefaultStyle();
+  const mergedStyle: ChartStyle = {
+    colors: style?.colors || defaultStyle.colors,
+    gradients: style?.gradients,
+    grid: { ...defaultStyle.grid, ...(style?.grid || {}) },
+    axis: { ...defaultStyle.axis, ...(style?.axis || {}) },
+    tooltip: { ...defaultStyle.tooltip, ...(style?.tooltip || {}) },
+    bar: { ...defaultStyle.bar, ...(style?.bar || {}) },
+    line: { ...defaultStyle.line, ...(style?.line || {}) },
+    pie: { ...defaultStyle.pie, ...(style?.pie || {}) }
+  };
+  
+  // Custom tooltip component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload || !payload.length) return null;
+    
+    return (
+      <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+        <p className="margin-0 font-semibold text-foreground">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="my-1 text-muted-foreground text-sm">
+            {entry.name}: {typeof entry.value === 'number' ? 
+              entry.value.toLocaleString() : entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
+  // Render gradients if specified
+  const renderGradients = () => {
+    if (!mergedStyle.gradients) return null;
+    
+    return (
+      <defs>
+        {Object.entries(mergedStyle.gradients).map(([name, gradient]) => (
+          <linearGradient key={name} id={`gradient-${name}`} x1="0" y1="0" x2="0" y2="1">
+            {gradient.map((stop, i) => (
+              <stop key={i} offset={stop.offset} stopColor={stop.color} />
+            ))}
+          </linearGradient>
+        ))}
+      </defs>
+    );
+  };
+  
+  // Create the chart component based on type
+  const renderChart = () => {
+    switch (type) {
+      case 'bar':
+        return (
+          <BarChart data={data}>
+            {renderGradients()}
+            <CartesianGrid 
+              strokeDasharray={mergedStyle.grid.strokeDasharray} 
+              stroke={mergedStyle.grid.stroke}
+              display={mergedStyle.grid.show ? 'block' : 'none'}
+            />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+              style={{ fontFamily: mergedStyle.axis.fontFamily }}
+            />
+            <YAxis 
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+              style={{ fontFamily: mergedStyle.axis.fontFamily }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            {options.legend?.show && <Legend />}
+            {options.series ? (
+              options.series.map((series, index) => (
+                <Bar 
+                  key={series}
+                  dataKey={series}
+                  fill={mergedStyle.gradients && Object.keys(mergedStyle.gradients)[index] ? 
+                    `url(#gradient-${Object.keys(mergedStyle.gradients)[index]})` : 
+                    mergedStyle.colors[index % mergedStyle.colors.length]}
+                  radius={mergedStyle.bar.radius as any}
+                  maxBarSize={mergedStyle.bar.maxBarSize}
+                />
+              ))
+            ) : (
+              <Bar 
+                dataKey="value" 
+                fill={mergedStyle.gradients && Object.keys(mergedStyle.gradients)[0] ? 
+                  `url(#gradient-${Object.keys(mergedStyle.gradients)[0]})` : 
+                  mergedStyle.colors[0]}
+                radius={mergedStyle.bar.radius as any}
+                maxBarSize={mergedStyle.bar.maxBarSize}
+              />
+            )}
+          </BarChart>
+        );
+      
+      case 'line':
+        return (
+          <LineChart data={data}>
+            {renderGradients()}
+            <CartesianGrid 
+              strokeDasharray={mergedStyle.grid.strokeDasharray} 
+              stroke={mergedStyle.grid.stroke}
+              display={mergedStyle.grid.show ? 'block' : 'none'}
+            />
+            <XAxis 
+              dataKey="name"
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+              style={{ fontFamily: mergedStyle.axis.fontFamily }}
+            />
+            <YAxis 
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+              style={{ fontFamily: mergedStyle.axis.fontFamily }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            {options.legend?.show && <Legend />}
+            {options.series ? (
+              options.series.map((series, index) => (
+                <Line 
+                  key={series}
+                  type="monotone"
+                  dataKey={series}
+                  stroke={mergedStyle.colors[index % mergedStyle.colors.length]}
+                  strokeWidth={mergedStyle.line.strokeWidth}
+                  dot={mergedStyle.line.dot}
+                  activeDot={mergedStyle.line.activeDot}
+                />
+              ))
+            ) : (
+              <Line 
+                type="monotone"
+                dataKey="value" 
+                stroke={mergedStyle.colors[0]}
+                strokeWidth={mergedStyle.line.strokeWidth}
+                dot={mergedStyle.line.dot}
+                activeDot={mergedStyle.line.activeDot}
+              />
+            )}
+          </LineChart>
+        );
+      
+      case 'pie':
+        return (
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={mergedStyle.pie.innerRadius}
+              outerRadius={mergedStyle.pie.outerRadius}
+              paddingAngle={mergedStyle.pie.paddingAngle}
+              cornerRadius={mergedStyle.pie.cornerRadius}
+              dataKey="value"
+              label={({ name, value, percent }) => `${name}: ${percent ? (percent * 100).toFixed(1) : '0'}%`}
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={mergedStyle.colors[index % mergedStyle.colors.length]} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+            {options.legend?.show && <Legend />}
+          </PieChart>
+        );
+        
+      case 'area':
+        return (
+          <AreaChart data={data}>
+            {renderGradients()}
+            <CartesianGrid 
+              strokeDasharray={mergedStyle.grid.strokeDasharray} 
+              stroke={mergedStyle.grid.stroke}
+              display={mergedStyle.grid.show ? 'block' : 'none'}
+            />
+            <XAxis 
+              dataKey="name"
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+              style={{ fontFamily: mergedStyle.axis.fontFamily }}
+            />
+            <YAxis 
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+              style={{ fontFamily: mergedStyle.axis.fontFamily }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            {options.legend?.show && <Legend />}
+            {options.series ? (
+              options.series.map((series, index) => (
+                <Area 
+                  key={series}
+                  type="monotone"
+                  dataKey={series}
+                  stroke={mergedStyle.colors[index % mergedStyle.colors.length]}
+                  fill={mergedStyle.gradients && Object.keys(mergedStyle.gradients)[index] ? 
+                    `url(#gradient-${Object.keys(mergedStyle.gradients)[index]})` : 
+                    mergedStyle.colors[index % mergedStyle.colors.length]}
+                  fillOpacity={0.8}
+                />
+              ))
+            ) : (
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke={mergedStyle.colors[0]}
+                fill={mergedStyle.gradients && Object.keys(mergedStyle.gradients)[0] ? 
+                  `url(#gradient-${Object.keys(mergedStyle.gradients)[0]})` : 
+                  mergedStyle.colors[0]}
+                fillOpacity={0.8}
+              />
+            )}
+          </AreaChart>
+        );
+        
+      case 'radar':
+        return (
+          <RadarChart data={data}>
+            <PolarGrid stroke={mergedStyle.grid.stroke} />
+            <PolarAngleAxis 
+              dataKey="name"
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+            />
+            <PolarRadiusAxis 
+              tick={{ fontSize: mergedStyle.axis.fontSize, fill: mergedStyle.axis.color }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            {options.legend?.show && <Legend />}
+            {options.series ? (
+              options.series.map((series, index) => (
+                <Radar 
+                  key={series}
+                  name={series}
+                  dataKey={series}
+                  stroke={mergedStyle.colors[index % mergedStyle.colors.length]}
+                  fill={mergedStyle.colors[index % mergedStyle.colors.length]}
+                  fillOpacity={0.6}
+                />
+              ))
+            ) : (
+              <Radar 
+                name="value"
+                dataKey="value"
+                stroke={mergedStyle.colors[0]}
+                fill={mergedStyle.colors[0]}
+                fillOpacity={0.6}
+              />
+            )}
+          </RadarChart>
+        );
+      
+      default:
+        return null;
+    }
+  };
+  
+  const chart = renderChart();
+  
+  // Only render if we have a valid chart
+  if (!chart) {
+    return (
+      <div className="chart-container bg-[#2a2b30] rounded-lg p-4 my-4">
+        <p className="text-muted-foreground">Unsupported chart type: {type}</p>
+      </div>
+    );
+  }
+  
+  // Handle both string and object title formats
+  const titleText = typeof options.title === 'string' ? options.title : options.title?.text;
+  const titleConfig = typeof options.title === 'object' ? options.title : null;
+  
+  return (
+    <div className="chart-container bg-muted dark:bg-muted rounded-lg p-4 my-4 border border-border">
+      {titleText && (
+        <h3 style={{
+          fontSize: titleConfig?.fontSize || 18,
+          fontWeight: titleConfig?.fontWeight || 600,
+          color: titleConfig?.color || '#fff',
+          marginBottom: titleConfig?.marginBottom || 8,
+          textAlign: 'center'
+        }}>
+          {titleText}
+        </h3>
+      )}
+      {options.subtitle && (
+        <p className="text-center text-muted-foreground" style={{
+          fontSize: options.subtitle.fontSize || 14,
+          marginBottom: options.subtitle.marginBottom || 16,
+        }}>
+          {options.subtitle.text}
+        </p>
+      )}
+      <div style={{ width: '100%', height: 400, fontFamily: mergedStyle.axis.fontFamily }}>
+        <ResponsiveContainer width="100%" height="100%">
+          {chart}
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
